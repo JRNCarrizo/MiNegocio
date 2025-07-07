@@ -1,0 +1,3 @@
+@echo off
+echo Ejecutando Backend de miNegocio...
+call mvnw.cmd spring-boot:run
