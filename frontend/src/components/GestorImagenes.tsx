@@ -14,7 +14,7 @@ export default function GestorImagenes({
   empresaId, 
   imagenesIniciales = [], 
   onChange, 
-  maxImagenes = 3,
+  maxImagenes = 5,
   disabled = false 
 }: GestorImagenesProps) {
   const [imagenes, setImagenes] = useState<string[]>(imagenesIniciales);
@@ -172,6 +172,7 @@ export default function GestorImagenes({
         <small className="text-muted">
           • Formatos aceptados: JPG, PNG, GIF<br/>
           • Tamaño máximo: 5MB por imagen<br/>
+          • Máximo 5 imágenes por producto<br/>
           • Se redimensionarán automáticamente a 500x500px
         </small>
       </div>

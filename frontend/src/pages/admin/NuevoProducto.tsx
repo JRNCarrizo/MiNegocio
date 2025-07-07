@@ -374,7 +374,7 @@ export default function NuevoProducto() {
                   empresaId={empresaId}
                   imagenesIniciales={formulario.imagenes}
                   onChange={manejarCambioImagenes}
-                  maxImagenes={3}
+                  maxImagenes={5}
                   disabled={cargando}
                 />
               </div>

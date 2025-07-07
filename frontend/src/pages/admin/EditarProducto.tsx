@@ -464,7 +464,7 @@ const EditarProducto: React.FC = () => {
                   empresaId={empresaId}
                   imagenesIniciales={formulario.imagenes}
                   onChange={manejarCambioImagenes}
-                  maxImagenes={3}
+                  maxImagenes={5}
                   disabled={guardando}
                 />
               </div>
