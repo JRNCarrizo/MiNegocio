@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ApiService from '../../services/api';
+import GestorImagenes from '../../components/GestorImagenes';
+import '../../styles/gestor-imagenes.css';
 
 const EditarProducto: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -29,12 +31,16 @@ const EditarProducto: React.FC = () => {
     imagenes: [] as string[]
   });
 
-  // Estado separado para nuevas imágenes
-  const [nuevasImagenes, setNuevasImagenes] = useState<File[]>([]);
-
   const [categorias, setCategorias] = useState<string[]>([]);
   const [cargandoCategorias, setCargandoCategorias] = useState(true);
   const [mostrarOtraCategoria, setMostrarOtraCategoria] = useState(false);
+
+  const manejarCambioImagenes = (imagenes: string[]) => {
+    setFormulario(prev => ({
+      ...prev,
+      imagenes
+    }));
+  };
 
   const cargarProducto = useCallback(async () => {
     if (!id) {
@@ -119,13 +125,6 @@ const EditarProducto: React.FC = () => {
       setCargandoCategorias(false);
     }
   }, [empresaId]);
-
-  const manejarImagenes = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const archivos = Array.from(e.target.files);
-      setNuevasImagenes(archivos);
-    }
-  };
 
   useEffect(() => {
     if (id) {
@@ -232,17 +231,6 @@ const EditarProducto: React.FC = () => {
     } finally {
       setGuardando(false);
     }
-  };
-
-  const eliminarImagenExistente = (index: number) => {
-    setFormulario({
-      ...formulario,
-      imagenes: formulario.imagenes.filter((_, i) => i !== index)
-    });
-  };
-
-  const eliminarNuevaImagen = (index: number) => {
-    setNuevasImagenes(nuevasImagenes.filter((_, i) => i !== index));
   };
 
   if (cargando) {
@@ -472,70 +460,13 @@ const EditarProducto: React.FC = () => {
 
               {/* Imágenes */}
               <div>
-                <label htmlFor="imagenes" className="etiqueta">
-                  Imágenes del Producto
-                </label>
-                
-                {/* Imágenes existentes */}
-                {formulario.imagenes.length > 0 && (
-                  <div className="mb-4">
-                    <p className="texto-pequeno mb-2">Imágenes actuales:</p>
-                    <div className="galeria-edicion">
-                      {formulario.imagenes.map((imagen, index) => (
-                        <div key={index} className="imagen-edicion">
-                          <img src={imagen} alt={`Imagen ${index + 1}`} />
-                          <button
-                            type="button"
-                            onClick={() => eliminarImagenExistente(index)}
-                            className="boton-eliminar-imagen"
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                
-                {/* Input para nuevas imágenes */}
-                <input
-                  type="file"
-                  id="imagenes"
-                  name="imagenes"
-                  onChange={manejarImagenes}
-                  className="campo"
-                  accept="image/*"
-                  multiple
+                <GestorImagenes
+                  empresaId={empresaId}
+                  imagenesIniciales={formulario.imagenes}
+                  onChange={manejarCambioImagenes}
+                  maxImagenes={3}
+                  disabled={guardando}
                 />
-                <p className="texto-pequeno texto-gris mt-1">
-                  Puedes seleccionar múltiples imágenes. Formatos soportados: JPG, PNG, GIF
-                </p>
-                
-                {/* Mostrar nuevas imágenes seleccionadas */}
-                {nuevasImagenes.length > 0 && (
-                  <div className="mt-3">
-                    <p className="texto-pequeno mb-2">
-                      {nuevasImagenes.length} nueva(s) imagen(es) seleccionada(s):
-                    </p>
-                    <div className="galeria-edicion">
-                      {nuevasImagenes.map((archivo, index) => (
-                        <div key={index} className="imagen-edicion">
-                          <img 
-                            src={URL.createObjectURL(archivo)} 
-                            alt={`Nueva imagen ${index + 1}`} 
-                          />
-                          <button
-                            type="button"
-                            onClick={() => eliminarNuevaImagen(index)}
-                            className="boton-eliminar-imagen"
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
 
               {/* Checkboxes para estado del producto */}

@@ -222,6 +222,23 @@ class ApiService {
   }
 
   // Métodos de subida de archivos
+  async subirImagenProducto(empresaId: number, archivo: File): Promise<ApiResponse<{ url: string }>> {
+    const formData = new FormData();
+    formData.append('imagen', archivo);
+    
+    const response = await this.api.post(`/empresas/${empresaId}/productos/subir-imagen`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
+  }
+
+  async eliminarImagenProducto(empresaId: number, urlImagen: string): Promise<ApiResponse<{ mensaje: string }>> {
+    const response = await this.api.delete(`/empresas/${empresaId}/productos/eliminar-imagen`, {
+      params: { url: urlImagen }
+    });
+    return response.data;
+  }
+
   async subirImagen(archivo: File, tipo: 'logo' | 'producto'): Promise<ApiResponse<{ url: string }>> {
     const formData = new FormData();
     formData.append('archivo', archivo);

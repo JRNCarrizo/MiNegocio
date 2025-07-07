@@ -2,6 +2,7 @@ package com.minegocio.backend.controladores;
 
 import com.minegocio.backend.dto.ProductoDTO;
 import com.minegocio.backend.servicios.ProductoService;
+import com.minegocio.backend.servicios.CloudinaryService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -26,6 +28,9 @@ public class ProductoController {
 
     @Autowired
     private ProductoService productoService;
+
+    @Autowired
+    private CloudinaryService cloudinaryService;
 
     /**
      * Obtiene todos los productos de una empresa
@@ -375,6 +380,74 @@ public class ProductoController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
                     .body(Map.of("mensaje", "Error al obtener categorías: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Sube una imagen a Cloudinary
+     */
+    @PostMapping("/subir-imagen")
+    public ResponseEntity<?> subirImagen(
+            @PathVariable Long empresaId,
+            @RequestParam("imagen") MultipartFile archivo) {
+        try {
+            // Validar que el archivo no esté vacío
+            if (archivo.isEmpty()) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "No se ha seleccionado ningún archivo"));
+            }
+
+            // Validar tipo de archivo
+            String tipoContenido = archivo.getContentType();
+            if (tipoContenido == null || !tipoContenido.startsWith("image/")) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "El archivo debe ser una imagen"));
+            }
+
+            // Validar tamaño del archivo (máximo 5MB)
+            if (archivo.getSize() > 5 * 1024 * 1024) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "La imagen no puede ser mayor a 5MB"));
+            }
+
+            // Subir imagen a Cloudinary
+            String urlImagen = cloudinaryService.subirImagen(archivo, empresaId);
+
+            return ResponseEntity.ok(Map.of(
+                "data", Map.of("url", urlImagen),
+                "mensaje", "Imagen subida exitosamente"
+            ));
+
+        } catch (Exception e) {
+            System.err.println("Error al subir imagen: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Error al subir la imagen: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Elimina una imagen de Cloudinary
+     */
+    @DeleteMapping("/eliminar-imagen")
+    public ResponseEntity<?> eliminarImagen(
+            @PathVariable Long empresaId,
+            @RequestParam("url") String urlImagen) {
+        try {
+            boolean eliminada = cloudinaryService.eliminarImagen(urlImagen);
+            
+            if (eliminada) {
+                return ResponseEntity.ok(Map.of("mensaje", "Imagen eliminada exitosamente"));
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", "No se pudo eliminar la imagen"));
+            }
+
+        } catch (Exception e) {
+            System.err.println("Error al eliminar imagen: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Error al eliminar la imagen: " + e.getMessage()));
         }
     }
 }

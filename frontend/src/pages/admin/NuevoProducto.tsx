@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import ApiService from '../../services/api';
+import GestorImagenes from '../../components/GestorImagenes';
+import '../../styles/gestor-imagenes.css';
 
 export default function NuevoProducto() {
   const navigate = useNavigate();
@@ -19,7 +21,7 @@ export default function NuevoProducto() {
     stockMinimo: '5',
     unidad: '',
     categoria: '',
-    imagenes: [] as File[]
+    imagenes: [] as string[]
   });
   const [cargando, setCargando] = useState(false);
   const [categorias, setCategorias] = useState<string[]>([]);
@@ -53,14 +55,11 @@ export default function NuevoProducto() {
     }));
   };
 
-  const manejarImagenes = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const archivos = Array.from(e.target.files);
-      setFormulario(prev => ({
-        ...prev,
-        imagenes: archivos
-      }));
-    }
+  const manejarCambioImagenes = (imagenes: string[]) => {
+    setFormulario(prev => ({
+      ...prev,
+      imagenes
+    }));
   };
 
   const validarFormulario = () => {
@@ -107,7 +106,7 @@ export default function NuevoProducto() {
       }
 
       // Preparar datos del producto
-      const datosProducto = {
+      const        datosProducto = {
         nombre: formulario.nombre.trim(),
         descripcion: formulario.descripcion.trim() || undefined,
         precio: Number(formulario.precio),
@@ -118,7 +117,7 @@ export default function NuevoProducto() {
         unidad: formulario.unidad.trim() || undefined,
         activo: true,
         destacado: false,
-        imagenes: [] as string[] // Por ahora sin imágenes
+        imagenes: formulario.imagenes // Ahora son URLs de strings
       };
 
       // Crear el producto en el backend
@@ -371,33 +370,13 @@ export default function NuevoProducto() {
 
               {/* Imágenes */}
               <div>
-                <label htmlFor="imagenes" className="etiqueta">
-                  Imágenes del Producto
-                </label>
-                <input
-                  type="file"
-                  id="imagenes"
-                  name="imagenes"
-                  onChange={manejarImagenes}
-                  className="campo"
-                  accept="image/*"
-                  multiple
+                <GestorImagenes
+                  empresaId={empresaId}
+                  imagenesIniciales={formulario.imagenes}
+                  onChange={manejarCambioImagenes}
+                  maxImagenes={3}
+                  disabled={cargando}
                 />
-                <p className="texto-pequeno texto-gris mt-1">
-                  Puedes seleccionar múltiples imágenes. Formatos soportados: JPG, PNG, GIF
-                </p>
-                {formulario.imagenes.length > 0 && (
-                  <div className="mt-3">
-                    <p className="texto-pequeno">
-                      {formulario.imagenes.length} imagen(es) seleccionada(s):
-                    </p>
-                    <ul className="texto-pequeno texto-gris mt-1">
-                      {formulario.imagenes.map((archivo, index) => (
-                        <li key={index}>• {archivo.name}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
               </div>
 
               {/* Botones */}

@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -75,8 +76,11 @@ public class ProductoService {
         producto.setStock(productoDTO.getStock());
         producto.setStockMinimo(productoDTO.getStockMinimo());
         
-        // Manejar imagen principal
-        if (productoDTO.getImagenUrl() != null && !productoDTO.getImagenUrl().isEmpty()) {
+        // Manejar imágenes
+        if (productoDTO.getImagenes() != null && !productoDTO.getImagenes().isEmpty()) {
+            producto.setImagenes(new ArrayList<>(productoDTO.getImagenes()));
+        } else if (productoDTO.getImagenUrl() != null && !productoDTO.getImagenUrl().isEmpty()) {
+            // Compatibilidad hacia atrás
             producto.getImagenes().add(productoDTO.getImagenUrl());
         }
         
@@ -127,11 +131,16 @@ public class ProductoService {
             producto.setActivo(productoDTO.getActivo());
         }
         
-        // Actualizar imagen principal si se proporciona
+        // Actualizar imágenes si se proporciona
+        if (productoDTO.getImagenes() != null) {
+            producto.setImagenes(new ArrayList<>(productoDTO.getImagenes()));
+        }
+        
+        // Actualizar imagen principal si se proporciona (para compatibilidad)
         if (productoDTO.getImagenUrl() != null && !productoDTO.getImagenUrl().isEmpty()) {
             if (producto.getImagenes().isEmpty()) {
                 producto.getImagenes().add(productoDTO.getImagenUrl());
-            } else {
+            } else if (!producto.getImagenes().contains(productoDTO.getImagenUrl())) {
                 producto.getImagenes().set(0, productoDTO.getImagenUrl());
             }
         }
@@ -223,21 +232,22 @@ public class ProductoService {
     }
 
     private ProductoDTO convertirADTO(Producto producto) {
-        return new ProductoDTO(
-                producto.getId(),
-                producto.getNombre(),
-                producto.getDescripcion(),
-                producto.getPrecio(),
-                producto.getStock(),
-                producto.getStockMinimo(),
-                producto.getImagenPrincipal(), // Usar imagen principal en lugar de getImagenUrl()
-                producto.getCategoria(),
-                producto.getMarca(),
-                producto.getActivo(),
-                producto.getEmpresa().getId(),
-                producto.getEmpresa().getNombre(),
-                producto.getFechaCreacion(),
-                producto.getFechaActualizacion()
-        );
+        ProductoDTO dto = new ProductoDTO();
+        dto.setId(producto.getId());
+        dto.setNombre(producto.getNombre());
+        dto.setDescripcion(producto.getDescripcion());
+        dto.setPrecio(producto.getPrecio());
+        dto.setStock(producto.getStock());
+        dto.setStockMinimo(producto.getStockMinimo());
+        dto.setImagenUrl(producto.getImagenPrincipal());
+        dto.setImagenes(new ArrayList<>(producto.getImagenes()));
+        dto.setCategoria(producto.getCategoria());
+        dto.setMarca(producto.getMarca());
+        dto.setActivo(producto.getActivo());
+        dto.setEmpresaId(producto.getEmpresa().getId());
+        dto.setEmpresaNombre(producto.getEmpresa().getNombre());
+        dto.setFechaCreacion(producto.getFechaCreacion());
+        dto.setFechaActualizacion(producto.getFechaActualizacion());
+        return dto;
     }
 }

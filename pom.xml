@@ -111,6 +111,13 @@
 			<version>2.2.0</version>
 		</dependency>
 		
+		<!-- Cloudinary para gestión de imágenes -->
+		<dependency>
+			<groupId>com.cloudinary</groupId>
+			<artifactId>cloudinary-http44</artifactId>
+			<version>1.36.0</version>
+		</dependency>
+		
 		<!-- Spring Boot DevTools para recarga automática -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

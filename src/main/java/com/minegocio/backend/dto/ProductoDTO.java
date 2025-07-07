@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class ProductoDTO {
     
@@ -32,6 +33,9 @@ public class ProductoDTO {
     
     @Size(max = 255, message = "La URL de la imagen no puede exceder 255 caracteres")
     private String imagenUrl;
+    
+    // Lista de URLs de imágenes
+    private List<String> imagenes;
     
     @Size(max = 100, message = "La categoría no puede exceder 100 caracteres")
     private String categoria;
@@ -130,6 +134,14 @@ public class ProductoDTO {
         this.imagenUrl = imagenUrl;
     }
     
+    public List<String> getImagenes() {
+        return imagenes;
+    }
+    
+    public void setImagenes(List<String> imagenes) {
+        this.imagenes = imagenes;
+    }
+    
     public String getCategoria() {
         return categoria;
     }
@@ -196,6 +208,7 @@ public class ProductoDTO {
                 ", stock=" + stock +
                 ", stockMinimo=" + stockMinimo +
                 ", imagenUrl='" + imagenUrl + '\'' +
+                ", imagenes=" + imagenes +
                 ", categoria='" + categoria + '\'' +
                 ", marca='" + marca + '\'' +
                 ", activo=" + activo +
