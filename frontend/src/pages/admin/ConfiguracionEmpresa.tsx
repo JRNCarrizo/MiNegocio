@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import ApiService from '../../services/api';
+import type { Empresa } from '../../types';
 
 interface ConfiguracionEmpresa {
   nombre: string;
@@ -51,30 +53,46 @@ export default function ConfiguracionEmpresa() {
 
   const cargarConfiguracion = async () => {
     try {
-      // Simular carga de configuración actual
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      setCargando(true);
+      
+      console.log('Cargando configuración de la empresa del administrador...');
+      
+      // Obtener datos de la empresa desde el backend usando el token del usuario
+      const response = await ApiService.obtenerEmpresaAdmin();
+      
+      if (!response.data) {
+        toast.error('No se encontraron datos de la empresa');
+        return;
+      }
+      
+      const empresa: Empresa = response.data;
+      
+      console.log('Datos de la empresa obtenidos:', empresa);
       
       setConfiguracion({
-        nombre: 'Mi Tienda Online',
-        descripcion: 'Una tienda moderna con productos de calidad para toda la familia.',
-        subdominio: 'mitienda',
-        email: 'contacto@mitienda.com',
-        telefono: '+34 666 123 456',
-        direccion: 'Calle Principal 123',
-        ciudad: 'Madrid',
-        codigoPostal: '28001',
-        pais: 'España',
+        nombre: empresa.nombre || '',
+        descripcion: empresa.descripcion || '',
+        subdominio: empresa.subdominio || '',
+        email: empresa.email || '',
+        telefono: empresa.telefono || '',
+        direccion: '',
+        ciudad: '',
+        codigoPostal: '',
+        pais: 'Argentina',
         logo: null,
-        colorPrimario: '#2563eb',
-        colorSecundario: '#64748b',
-        moneda: 'ARS',
+        colorPrimario: empresa.colorPrimario || '#2563eb',
+        colorSecundario: empresa.colorSecundario || '#64748b',
+        moneda: empresa.moneda || 'USD',
         idioma: 'es',
         notificacionesPedidos: true,
         notificacionesStock: true,
         stockMinimo: 5
       });
-    } catch {
-      toast.error('Error al cargar la configuración');
+      
+      toast.success('Configuración cargada correctamente');
+    } catch (error) {
+      console.error('Error al cargar la configuración:', error);
+      toast.error('Error al cargar la configuración de la empresa');
     } finally {
       setCargando(false);
     }
@@ -132,11 +150,31 @@ export default function ConfiguracionEmpresa() {
     setGuardando(true);
     
     try {
-      // Simular guardado
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Datos a enviar al backend
+      const datosEmpresa = {
+        nombre: configuracion.nombre,
+        descripcion: configuracion.descripcion,
+        email: configuracion.email,
+        telefono: configuracion.telefono,
+        colorPrimario: configuracion.colorPrimario,
+        colorSecundario: configuracion.colorSecundario,
+        moneda: configuracion.moneda
+      };
       
-      toast.success('Configuración guardada exitosamente');
-    } catch {
+      console.log('Guardando configuración:', datosEmpresa);
+      
+      // Enviar datos al backend
+      const response = await ApiService.actualizarEmpresaAdmin(datosEmpresa);
+      
+      if (response.data) {
+        toast.success('Configuración guardada exitosamente');
+        // Recargar la configuración para mostrar los datos actualizados
+        cargarConfiguracion();
+      } else {
+        toast.error('Error al guardar la configuración');
+      }
+    } catch (error) {
+      console.error('Error al guardar la configuración:', error);
       toast.error('Error al guardar la configuración');
     } finally {
       setGuardando(false);

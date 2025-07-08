@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba Backend Simple</title>
+</head>
+<body>
+    <h1>Prueba de Conectividad Backend</h1>
+    
+    <div style="margin: 20px 0;">
+        <button onclick="probarPing()">Probar Ping</button>
+        <button onclick="probarDebug()">Probar Debug</button>
+        <button onclick="probarEmpresas()">Probar Empresas</button>
+        <button onclick="probarRegistro()">Probar Registro</button>
+    </div>
+
+    <div id="resultado" style="background: #f5f5f5; padding: 20px; margin-top: 20px; white-space: pre-wrap;"></div>
+
+    <script>
+        async function mostrarResultado(titulo, promesa) {
+            const resultado = document.getElementById('resultado');
+            resultado.textContent = `${titulo}\nCargando...`;
+            
+            try {
+                const response = await promesa;
+                const texto = await response.text();
+                resultado.textContent = `${titulo}\nStatus: ${response.status}\nResponse: ${texto}`;
+            } catch (error) {
+                resultado.textContent = `${titulo}\nError: ${error.message}`;
+            }
+        }
+
+        async function probarPing() {
+            await mostrarResultado(
+                "=== PRUEBA PING ===",
+                fetch('http://localhost:8080/api/publico/minegocio/auth/ping')
+            );
+        }
+
+        async function probarDebug() {
+            await mostrarResultado(
+                "=== PRUEBA DEBUG ===",
+                fetch('http://localhost:8080/api/publico/minegocio/auth/debug')
+            );
+        }
+
+        async function probarEmpresas() {
+            await mostrarResultado(
+                "=== PRUEBA EMPRESAS ===",
+                fetch('http://localhost:8080/api/publico/minegocio/auth/empresas')
+            );
+        }
+
+        async function probarRegistro() {
+            const datos = {
+                nombre: "Juan Pérez",
+                apellidos: "García",
+                email: "juan.test@example.com",
+                telefono: "1234567890",
+                password: "123456"
+            };
+
+            await mostrarResultado(
+                "=== PRUEBA REGISTRO ===",
+                fetch('http://localhost:8080/api/publico/minegocio/auth/registro', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(datos)
+                })
+            );
+        }
+    </script>
+</body>
+</html>

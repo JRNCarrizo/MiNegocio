@@ -12,9 +12,11 @@ import EditarProducto from './pages/admin/EditarProducto.tsx';
 import GestionPedidos from './pages/admin/GestionPedidos.tsx';
 import GestionClientes from './pages/admin/GestionClientes.tsx';
 import ConfiguracionEmpresa from './pages/admin/ConfiguracionEmpresa.tsx';
-import TiendaCliente from './pages/TiendaCliente.tsx';
+import CatalogoPublico from './pages/CatalogoPublico.tsx';
+import ProductoPublico from './pages/ProductoPublico.tsx';
 import LoginCliente from './pages/LoginCliente.tsx';
 import RegistroCliente from './pages/RegistroCliente.tsx';
+import AreaPersonalCliente from './pages/AreaPersonalCliente.tsx';
 
 function AppContent() {
   const { esSubdominioPrincipal, cargando } = useSubdominio();
@@ -36,6 +38,7 @@ function AppContent() {
           <Route path="/" element={<PaginaPrincipal />} />
           <Route path="/registro" element={<PaginaRegistro />} />
           <Route path="/login" element={<Navigate to="/admin/login" replace />} />
+          <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="/admin/login" element={<LoginAdministrador />} />
           <Route path="/admin/dashboard" element={<DashboardAdministrador />} />
           <Route path="/admin/productos" element={<GestionProductos />} />
@@ -50,10 +53,11 @@ function AppContent() {
       ) : (
         // Rutas para subdominios (tiendas de clientes)
         <>
-          <Route path="/" element={<TiendaCliente />} />
+          <Route path="/" element={<CatalogoPublico />} />
+          <Route path="/producto/:id" element={<ProductoPublico />} />
           <Route path="/login" element={<LoginCliente />} />
           <Route path="/registro" element={<RegistroCliente />} />
-          <Route path="/cuenta/*" element={<div>Área del cliente (por implementar)</div>} />
+          <Route path="/cuenta" element={<AreaPersonalCliente />} />
           <Route path="/carrito" element={<div>Carrito de compras (por implementar)</div>} />
           <Route path="/checkout" element={<div>Proceso de compra (por implementar)</div>} />
           <Route path="*" element={<Navigate to="/" replace />} />

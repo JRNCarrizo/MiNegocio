@@ -1,49 +1,72 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useSubdominio } from '../hooks/useSubdominio';
+import { useForm } from 'react-hook-form';
+import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { useSubdominio } from '../hooks/useSubdominio';
+import api from '../services/api';
 
-const LoginCliente = () => {
-  const { empresa, cargando: cargandoEmpresa, error: errorEmpresa } = useSubdominio();
-  const [datosLogin, setDatosLogin] = useState({
-    email: '',
-    contrasena: ''
-  });
-  const [cargandoLogin, setCargandoLogin] = useState(false);
+interface LoginClienteForm {
+  email: string;
+  password: string;
+}
 
-  const manejarCambio = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setDatosLogin(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+export default function LoginCliente() {
+  const { empresa, cargando: cargandoEmpresa, subdominio } = useSubdominio();
+  const [cargando, setCargando] = useState(false);
+  const navigate = useNavigate();
+  
+  const {
+    register,
+    handleSubmit,
+    formState: { errors }
+  } = useForm<LoginClienteForm>();
 
-  const manejarSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const manejarLogin = async (datos: LoginClienteForm) => {
+    const subdominioFinal = subdominio || 'minegocio';
     
-    if (!datosLogin.email || !datosLogin.contrasena) {
-      toast.error('Todos los campos son obligatorios');
+    if (!subdominioFinal) {
+      toast.error('No se pudo identificar la tienda');
       return;
     }
 
+    setCargando(true);
     try {
-      setCargandoLogin(true);
+      const response = await api.loginCliente(subdominioFinal, {
+        email: datos.email,
+        password: datos.password
+      });
       
-      // Aquí se implementaría la lógica de login del cliente
-      // await apiService.loginCliente(datosLogin, empresa.id);
+      if (response.token) {
+        // Guardar el token en localStorage
+        localStorage.setItem('clienteToken', response.token);
+        localStorage.setItem('clienteInfo', JSON.stringify(response.cliente));
+        
+        console.log('Login exitoso para:', response.cliente.email);
+        
+        toast.success('¡Bienvenido!');
+        navigate('/');
+      } else {
+        console.error('No se recibió token en la respuesta');
+        toast.error('Error: No se recibió token de autenticación');
+      }
+    } catch (error: unknown) {
+      console.error('Error en login de cliente:', error);
       
-      // Simulación por ahora
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Manejo más detallado de errores
+      let mensaje = 'Error al iniciar sesión. Verifica tus credenciales.';
       
-      toast.success('¡Bienvenido!');
-      // Redirigir al perfil del cliente o catálogo
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { data?: { error?: string; mensaje?: string } } };
+        if (axiosError.response?.data?.error) {
+          mensaje = axiosError.response.data.error;
+        } else if (axiosError.response?.data?.mensaje) {
+          mensaje = axiosError.response.data.mensaje;
+        }
+      }
       
-    } catch (error) {
-      console.error('Error en login:', error);
-      toast.error('Credenciales incorrectas');
+      toast.error(mensaje);
     } finally {
-      setCargandoLogin(false);
+      setCargando(false);
     }
   };
 
@@ -56,136 +79,130 @@ const LoginCliente = () => {
     );
   }
 
-  if (errorEmpresa || !empresa) {
+  if (!empresa) {
     return (
       <div className="pagina-error">
-        <div className="contenido-error">
-          <h1>Tienda no encontrada</h1>
-          <p>La tienda que buscas no existe o no está disponible.</p>
-          <Link to="/" className="boton boton-primario">
-            Ir al inicio
-          </Link>
-        </div>
+        <h1>Tienda no encontrada</h1>
+        <p>No se pudo encontrar la tienda solicitada.</p>
+        <Link to="/" className="boton boton-primario">
+          Volver al inicio
+        </Link>
       </div>
     );
   }
 
-  const estilosPersonalizados = empresa.colorPrimario ? {
-    '--color-primario': empresa.colorPrimario,
-    '--color-secundario': empresa.colorSecundario || '#6366f1'
-  } as React.CSSProperties : {};
-
   return (
-    <div className="login-cliente-pagina" style={estilosPersonalizados}>
-      {/* Header con logo de la empresa */}
-      <header className="header-login-cliente">
+    <div className="login-cliente">
+      {/* Header de la tienda */}
+      <header className="header-tienda">
         <div className="contenedor">
-          <Link to="/" className="logo-empresa-login">
-            {empresa.logoUrl ? (
-              <img src={empresa.logoUrl} alt={empresa.nombre} className="logo-img" />
-            ) : (
-              <div className="logo-texto">{empresa.nombre}</div>
+          <div className="info-empresa">
+            {empresa.logoUrl && (
+              <img 
+                src={empresa.logoUrl} 
+                alt={`Logo de ${empresa.nombre}`}
+                className="logo-empresa"
+              />
             )}
-          </Link>
+            <div>
+              <h1 className="nombre-empresa">{empresa.nombre}</h1>
+            </div>
+          </div>
+          
+          <nav className="nav-tienda">
+            <Link to="/" className="nav-link">Catálogo</Link>
+            <Link to="/carrito" className="nav-link">Carrito</Link>
+          </nav>
         </div>
       </header>
 
-      {/* Contenido principal */}
-      <div className="contenido-login-cliente">
-        <div className="contenedor">
-          <div className="tarjeta-login-cliente">
-            <div className="encabezado-login">
-              <h1 className="titulo-login">Iniciar Sesión</h1>
-              <p className="subtitulo-login">
-                Accede a tu cuenta en {empresa.nombre}
-              </p>
+      <main className="contenedor">
+        <div className="formulario-login-cliente">
+          <div className="tarjeta-login">
+            <div className="cabecera-login">
+              <h2>Iniciar Sesión</h2>
+              <p>Accede a tu cuenta en {empresa.nombre}</p>
             </div>
 
-            <form onSubmit={manejarSubmit} className="formulario-login-cliente">
+            <form onSubmit={handleSubmit(manejarLogin)}>
               <div className="grupo-campo">
-                <label htmlFor="email" className="etiqueta-campo">
-                  Correo Electrónico
+                <label htmlFor="email" className="etiqueta">
+                  Email
                 </label>
                 <input
                   type="email"
                   id="email"
-                  name="email"
-                  value={datosLogin.email}
-                  onChange={manejarCambio}
-                  className="campo-entrada"
+                  className={`campo ${errors.email ? 'campo-error' : ''}`}
                   placeholder="tu@email.com"
-                  required
+                  {...register('email', { 
+                    required: 'El email es obligatorio',
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: 'Email inválido'
+                    }
+                  })}
                 />
+                {errors.email && (
+                  <p className="mensaje-error">{errors.email.message}</p>
+                )}
               </div>
 
               <div className="grupo-campo">
-                <label htmlFor="contrasena" className="etiqueta-campo">
+                <label htmlFor="password" className="etiqueta">
                   Contraseña
                 </label>
                 <input
                   type="password"
-                  id="contrasena"
-                  name="contrasena"
-                  value={datosLogin.contrasena}
-                  onChange={manejarCambio}
-                  className="campo-entrada"
-                  placeholder="••••••••"
-                  required
+                  id="password"
+                  className={`campo ${errors.password ? 'campo-error' : ''}`}
+                  placeholder="Tu contraseña"
+                  {...register('password', { 
+                    required: 'La contraseña es obligatoria',
+                    minLength: {
+                      value: 6,
+                      message: 'La contraseña debe tener al menos 6 caracteres'
+                    }
+                  })}
                 />
-              </div>
-
-              <div className="opciones-login">
-                <label className="checkbox-container">
-                  <input type="checkbox" className="checkbox" />
-                  <span className="checkmark"></span>
-                  Recordarme
-                </label>
-                <a href="#" className="enlace-recuperar">
-                  ¿Olvidaste tu contraseña?
-                </a>
+                {errors.password && (
+                  <p className="mensaje-error">{errors.password.message}</p>
+                )}
               </div>
 
               <button
                 type="submit"
-                disabled={cargandoLogin}
-                className="boton boton-primario boton-completo"
+                disabled={cargando}
+                className={`boton boton-primario boton-completo boton-grande ${
+                  cargando ? 'opacidad-50 cursor-no-permitido' : ''
+                }`}
               >
-                {cargandoLogin ? (
-                  <>
-                    <div className="spinner-pequeno"></div>
+                {cargando ? (
+                  <span className="flex items-centro centrado">
+                    <span className="cargando" style={{ marginRight: '0.5rem' }}></span>
                     Iniciando sesión...
-                  </>
+                  </span>
                 ) : (
                   'Iniciar Sesión'
                 )}
               </button>
-            </form>
 
-            <div className="separador-login">
-              <span>¿No tienes cuenta?</span>
-            </div>
+              <div className="enlaces-login">
+                <Link to="/recuperar-password" className="enlace-secundario">
+                  ¿Olvidaste tu contraseña?
+                </Link>
+              </div>
 
-            <Link to="/registro" className="boton boton-secundario boton-completo">
-              Crear cuenta nueva
-            </Link>
+              <div className="separador">
+                <span>¿No tienes cuenta?</span>
+              </div>
 
-            <div className="volver-tienda">
-              <Link to="/" className="enlace-volver">
-                ← Volver a la tienda
+              <Link to="/registro" className="boton boton-secundario boton-completo">
+                Crear cuenta
               </Link>
-            </div>
+            </form>
           </div>
         </div>
-      </div>
-
-      {/* Footer minimalista */}
-      <footer className="footer-login-cliente">
-        <div className="contenedor">
-          <p>&copy; 2024 {empresa.nombre}. Todos los derechos reservados.</p>
-        </div>
-      </footer>
+      </main>
     </div>
   );
-};
-
-export default LoginCliente;
+}

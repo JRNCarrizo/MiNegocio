@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba Login Cliente</title>
+</head>
+<body>
+    <h1>Prueba de Login de Cliente</h1>
+    
+    <!-- Panel de debug -->
+    <div style="background: #f0f0f0; padding: 10px; margin-bottom: 20px; border: 1px solid #ccc;">
+        <h3>Debug Info:</h3>
+        <p><strong>Token actual:</strong> <span id="tokenActual">-</span></p>
+        <p><strong>Cliente actual:</strong> <span id="clienteActual">-</span></p>
+        <button onclick="verificarEstado()">Verificar Estado</button>
+        <button onclick="limpiarStorage()">Limpiar Storage</button>
+    </div>
+    
+    <form id="loginForm">
+        <div>
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" value="jorge@example.com" required>
+        </div>
+        <div>
+            <label for="password">Contraseña:</label>
+            <input type="password" id="password" name="password" value="123456" required>
+        </div>
+        <button type="submit">Iniciar Sesión</button>
+    </form>
+
+    <div id="resultado"></div>
+
+    <script>
+        function verificarEstado() {
+            const token = localStorage.getItem('clienteToken');
+            const cliente = localStorage.getItem('clienteInfo');
+            
+            document.getElementById('tokenActual').textContent = token ? token.substring(0, 50) + '...' : 'No hay token';
+            document.getElementById('clienteActual').textContent = cliente || 'No hay cliente';
+            
+            console.log('Token completo:', token);
+            console.log('Cliente completo:', cliente);
+        }
+        
+        function limpiarStorage() {
+            localStorage.removeItem('clienteToken');
+            localStorage.removeItem('clienteInfo');
+            localStorage.removeItem('subdominio-desarrollo');
+            verificarEstado();
+            console.log('Storage limpiado');
+        }
+        
+        // Verificar estado inicial
+        verificarEstado();
+        
+        // Configurar subdominio de desarrollo
+        localStorage.setItem('subdominio-desarrollo', 'minegocio');
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const datos = Object.fromEntries(formData);
+            
+            console.log('=== INTENTANDO LOGIN ===');
+            console.log('Datos:', datos);
+            
+            try {
+                const response = await fetch('http://localhost:8080/api/publico/minegocio/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(datos)
+                });
+                
+                console.log('Response status:', response.status);
+                
+                if (response.ok) {
+                    const resultado = await response.json();
+                    console.log('Login exitoso:', resultado);
+                    
+                    if (resultado.token && resultado.cliente) {
+                        // Guardar token y cliente
+                        localStorage.setItem('clienteToken', resultado.token);
+                        localStorage.setItem('clienteInfo', JSON.stringify(resultado.cliente));
+                        
+                        document.getElementById('resultado').innerHTML = 
+                            `<div style="color: green;">
+                                <h3>¡Login exitoso!</h3>
+                                <p><strong>Cliente:</strong> ${resultado.cliente.nombre} ${resultado.cliente.apellidos}</p>
+                                <p><strong>Email:</strong> ${resultado.cliente.email}</p>
+                                <p><strong>Token:</strong> ${resultado.token.substring(0, 50)}...</p>
+                            </div>`;
+                        
+                        // Verificar estado después del login
+                        setTimeout(() => {
+                            verificarEstado();
+                        }, 1000);
+                        
+                    } else {
+                        document.getElementById('resultado').innerHTML = 
+                            `<div style="color: orange;">Login exitoso pero faltan datos: ${JSON.stringify(resultado)}</div>`;
+                    }
+                } else {
+                    const error = await response.json();
+                    console.error('Error de login:', error);
+                    document.getElementById('resultado').innerHTML = 
+                        `<div style="color: red;">Error: ${JSON.stringify(error)}</div>`;
+                }
+            } catch (error) {
+                console.error('Error de conexión:', error);
+                document.getElementById('resultado').innerHTML = 
+                    `<div style="color: red;">Error de conexión: ${error.message}</div>`;
+            }
+        });
+    </script>
+</body>
+</html>

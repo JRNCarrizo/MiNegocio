@@ -3,10 +3,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import ApiService from '../../services/api';
 import GestorImagenes from '../../components/GestorImagenes';
+import NavbarAdmin from '../../components/NavbarAdmin';
+import { useUsuarioActual } from '../../hooks/useUsuarioActual';
 import '../../styles/gestor-imagenes.css';
 
 export default function NuevoProducto() {
   const navigate = useNavigate();
+  const { datosUsuario, cerrarSesion } = useUsuarioActual();
   
   // Usuario logueado
   const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -183,14 +186,16 @@ export default function NuevoProducto() {
   return (
     <div className="h-pantalla-minimo" style={{ backgroundColor: '#f8fafc' }}>
       {/* Navegación */}
-      <nav className="navbar">
-        <div className="contenedor">        <div className="navbar-contenido">
-          <Link to="/admin/productos" className="logo">
-            ← miNegocio - Admin
-          </Link>
-        </div>
-        </div>
-      </nav>
+      <NavbarAdmin 
+        onCerrarSesion={() => {
+          cerrarSesion();
+          toast.success('Sesión cerrada correctamente');
+        }}
+        empresaNombre={datosUsuario?.empresaNombre}
+        nombreAdministrador={datosUsuario?.nombre}
+        mostrarVolver={true}
+        urlVolver="/admin/productos"
+      />
 
       {/* Contenido principal */}
       <div className="contenedor py-8">

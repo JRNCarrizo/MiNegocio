@@ -20,6 +20,14 @@ export const useSubdominio = (): UseSubdominioReturn => {
     const detectarSubdominio = () => {
       const hostname = window.location.hostname;
       
+      // MODO DESARROLLO: Forzar subdominio para pruebas
+      const subdominioDesarrollo = localStorage.getItem('subdominio-desarrollo');
+      if (subdominioDesarrollo) {
+        console.log('Usando subdominio de desarrollo:', subdominioDesarrollo);
+        setSubdominio(subdominioDesarrollo);
+        return subdominioDesarrollo;
+      }
+      
       // Lista de dominios principales (desarrollo y producción)
       const dominiosPrincipales = [
         'localhost',
@@ -28,31 +36,37 @@ export const useSubdominio = (): UseSubdominioReturn => {
         'app.minegocio.com' // app principal
       ];
 
-      // Verificar si es un dominio principal
-      const esDominioPrincipal = dominiosPrincipales.some(dominio => 
-        hostname === dominio || hostname.endsWith(`.${dominio}`)
-      );
+      console.log('Hostname detectado:', hostname);
 
-      if (esDominioPrincipal) {
-        // Es el dominio principal (para registro de empresas)
+      // Verificar si es exactamente un dominio principal
+      if (dominiosPrincipales.includes(hostname)) {
+        console.log('Es dominio principal');
         setSubdominio(null);
         setCargando(false);
-        return;
+        return null;
       }
 
-      // Extraer subdominio
+      // Verificar si es un subdominio
       const partes = hostname.split('.');
-      if (partes.length >= 3) {
-        const subdominioExtraido = partes[0];
-        setSubdominio(subdominioExtraido);
-        return subdominioExtraido;
-      } else if (partes.length === 2 && !dominiosPrincipales.includes(hostname)) {
-        // Caso de desarrollo con formato subdominio.localhost
-        const subdominioExtraido = partes[0];
-        setSubdominio(subdominioExtraido);
-        return subdominioExtraido;
+      console.log('Partes del hostname:', partes);
+      
+      if (partes.length >= 2) {
+        // Si es algo como "empresa.localhost" o "empresa.minegocio.com"
+        const posibleSubdominio = partes[0];
+        const dominio = partes.slice(1).join('.');
+        
+        console.log('Posible subdominio:', posibleSubdominio);
+        console.log('Dominio base:', dominio);
+        
+        // Verificar si el dominio base es uno de los principales
+        if (dominiosPrincipales.includes(dominio)) {
+          console.log('Subdominio detectado:', posibleSubdominio);
+          setSubdominio(posibleSubdominio);
+          return posibleSubdominio;
+        }
       }
 
+      console.log('No es dominio principal ni subdominio válido');
       setSubdominio(null);
       setCargando(false);
       return null;
@@ -82,10 +96,20 @@ export const useSubdominio = (): UseSubdominioReturn => {
     }
   };
 
+  const esSubdominioPrincipal = subdominio === null;
+  
+  console.log('Hook useSubdominio return:', {
+    subdominio,
+    empresa: empresa?.nombre,
+    esSubdominioPrincipal,
+    cargando,
+    error
+  });
+
   return {
     subdominio,
     empresa,
-    esSubdominioPrincipal: subdominio === null,
+    esSubdominioPrincipal,
     cargando,
     error
   };

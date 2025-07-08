@@ -12,8 +12,9 @@ public class ClienteDTO {
     @Size(max = 100, message = "El nombre no puede exceder 100 caracteres")
     private String nombre;
     
-    @Size(max = 100, message = "El apellido no puede exceder 100 caracteres")
-    private String apellido;
+    @NotBlank(message = "Los apellidos son requeridos")
+    @Size(max = 100, message = "Los apellidos no pueden exceder 100 caracteres")
+    private String apellidos;
     
     @NotBlank(message = "El email es requerido")
     @Email(message = "El formato del email no es válido")
@@ -40,15 +41,19 @@ public class ClienteDTO {
     
     private String empresaNombre;
     
+    // Campos para autenticación
+    private String password;
+    private Boolean emailVerificado;
+
     // Constructores
     public ClienteDTO() {}
     
-    public ClienteDTO(Long id, String nombre, String apellido, String email, String telefono, 
+    public ClienteDTO(Long id, String nombre, String apellidos, String email, String telefono, 
                      String direccion, String ciudad, String pais, String codigoPostal, 
                      Boolean activo, Long empresaId, String empresaNombre) {
         this.id = id;
         this.nombre = nombre;
-        this.apellido = apellido;
+        this.apellidos = apellidos;
         this.email = email;
         this.telefono = telefono;
         this.direccion = direccion;
@@ -75,14 +80,6 @@ public class ClienteDTO {
     
     public void setNombre(String nombre) {
         this.nombre = nombre;
-    }
-    
-    public String getApellido() {
-        return apellido;
-    }
-    
-    public void setApellido(String apellido) {
-        this.apellido = apellido;
     }
     
     public String getEmail() {
@@ -155,5 +152,30 @@ public class ClienteDTO {
     
     public void setEmpresaNombre(String empresaNombre) {
         this.empresaNombre = empresaNombre;
+    }
+    
+    // Getters y setters para nuevos campos
+    public String getApellidos() {
+        return apellidos;
+    }
+    
+    public void setApellidos(String apellidos) {
+        this.apellidos = apellidos;
+    }
+    
+    public String getPassword() {
+        return password;
+    }
+    
+    public void setPassword(String password) {
+        this.password = password;
+    }
+    
+    public Boolean getEmailVerificado() {
+        return emailVerificado;
+    }
+    
+    public void setEmailVerificado(Boolean emailVerificado) {
+        this.emailVerificado = emailVerificado;
     }
 }

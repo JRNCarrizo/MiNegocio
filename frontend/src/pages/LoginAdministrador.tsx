@@ -35,8 +35,8 @@ export default function LoginAdministrador() {
       // Extraer información del usuario de la respuesta
       const user = {
         id: 1, // TODO: obtener del JWT o respuesta
-        nombre: 'Administrador',
-        apellidos: 'Principal',
+        nombre: response.nombre || 'Usuario',
+        apellidos: response.apellidos || '',
         email: response.email,
         rol: response.roles[0],
         empresaId: response.empresaId,

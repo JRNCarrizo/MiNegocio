@@ -103,15 +103,7 @@ const DetalleProducto: React.FC = () => {
     const nuevoStock = Math.max(0, producto.stock + cambio);
     
     try {
-      // Simular delay de red
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
-      // Actualizar directamente en el estado (modo mock)
-      setProducto({ ...producto, stock: nuevoStock });
-      console.log(`Stock actualizado: ${producto.stock} → ${nuevoStock}`);
-      
-      // TODO: Reemplazar con llamada real al API
-      /*
+      // Llamada real al API
       const response = await ApiService.actualizarProducto(
         empresaId,
         producto.id,
@@ -120,10 +112,10 @@ const DetalleProducto: React.FC = () => {
 
       if (response.data) {
         setProducto({ ...producto, stock: nuevoStock });
+        console.log(`Stock actualizado en BD: ${producto.stock} → ${nuevoStock}`);
       } else {
         setError('Error al actualizar stock');
       }
-      */
     } catch (error) {
       setError('Error al actualizar stock');
       console.error('Error:', error);
@@ -134,28 +126,21 @@ const DetalleProducto: React.FC = () => {
     if (!producto || !empresaId) return;
     
     try {
-      // Simular delay de red
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
-      // Actualizar directamente en el estado (modo mock)
       const nuevoEstado = !producto.activo;
-      setProducto({ ...producto, activo: nuevoEstado });
-      console.log(`Estado cambiado: ${producto.activo} → ${nuevoEstado}`);
       
-      // TODO: Reemplazar con llamada real al API
-      /*
+      // Llamada real al API
       const response = await ApiService.actualizarProducto(
         empresaId,
         producto.id,
-        { activo: !producto.activo }
+        { activo: nuevoEstado }
       );
 
       if (response.data) {
-        setProducto({ ...producto, activo: !producto.activo });
+        setProducto({ ...producto, activo: nuevoEstado });
+        console.log(`Estado cambiado en BD: ${producto.activo} → ${nuevoEstado}`);
       } else {
         setError('Error al cambiar estado');
       }
-      */
     } catch (error) {
       setError('Error al cambiar estado');
       console.error('Error:', error);
@@ -166,31 +151,57 @@ const DetalleProducto: React.FC = () => {
     if (!producto || !empresaId) return;
     
     try {
-      // Simular delay de red
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
-      // Actualizar directamente en el estado (modo mock)
       const nuevoDestacado = !producto.destacado;
-      setProducto({ ...producto, destacado: nuevoDestacado });
-      console.log(`Destacado cambiado: ${producto.destacado} → ${nuevoDestacado}`);
       
-      // TODO: Reemplazar con llamada real al API
-      /*
+      console.log('=== DEBUG DESTACADO ===');
+      console.log('Producto actual:', producto);
+      console.log('Nuevo destacado:', nuevoDestacado);
+      console.log('EmpresaId:', empresaId);
+      console.log('ProductoId:', producto.id);
+      
+      // Llamada real al API
       const response = await ApiService.actualizarProducto(
         empresaId,
         producto.id,
-        { destacado: !producto.destacado }
+        { destacado: nuevoDestacado }
       );
 
+      console.log('Respuesta del API:', response);
+
       if (response.data) {
-        setProducto({ ...producto, destacado: !producto.destacado });
+        setProducto({ ...producto, destacado: nuevoDestacado });
+        console.log(`Destacado cambiado en BD: ${producto.destacado} → ${nuevoDestacado}`);
       } else {
+        console.error('No se recibió data en la respuesta:', response);
         setError('Error al cambiar destacado');
       }
-      */
     } catch (error) {
-      setError('Error al cambiar destacado');
-      console.error('Error:', error);
+      console.error('Error completo al cambiar destacado:', error);
+      
+      let mensaje = 'Error al cambiar destacado';
+      if (error && typeof error === 'object') {
+        const errorObj = error as { response?: { status?: number; data?: { error?: string; message?: string } }; message?: string };
+        
+        console.log('Status del error:', errorObj.response?.status);
+        console.log('Data del error:', errorObj.response?.data);
+        
+        if (errorObj.response?.status === 403) {
+          mensaje = 'No tienes permisos para modificar este producto. Verifica tu sesión.';
+        } else if (errorObj.response?.status === 401) {
+          mensaje = 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.';
+        } else if (errorObj.response?.status === 400) {
+          mensaje = `Error de validación: ${errorObj.response.data?.error || errorObj.response.data?.message || 'Datos inválidos'}`;
+        } else if (errorObj.response?.status === 404) {
+          mensaje = 'Producto no encontrado';
+        } else if (errorObj.response?.status === 500) {
+          mensaje = `Error del servidor: ${errorObj.response.data?.error || errorObj.response.data?.message || 'Error interno'}`;
+        } else if (errorObj.message) {
+          mensaje = `Error: ${errorObj.message}`;
+        }
+      }
+      
+      setError(mensaje);
+      console.error('Mensaje de error mostrado:', mensaje);
     }
   };
 

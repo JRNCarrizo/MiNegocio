@@ -31,3 +31,10 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Base de datos H2 persistente
+data/
+*.db
+
+# Archivos de subida
+uploads/

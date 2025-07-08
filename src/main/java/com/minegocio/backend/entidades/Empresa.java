@@ -54,6 +54,9 @@ public class Empresa {
     @Column(name = "color_secundario", length = 7)  
     private String colorSecundario = "#1F2937"; // Gris oscuro por defecto
 
+    @Column(name = "moneda", length = 10)
+    private String moneda = "USD"; // Moneda por defecto
+
     // Estado de la suscripción
     @Enumerated(EnumType.STRING)
     @Column(name = "estado_suscripcion")
@@ -126,6 +129,9 @@ public class Empresa {
 
     public String getColorSecundario() { return colorSecundario; }
     public void setColorSecundario(String colorSecundario) { this.colorSecundario = colorSecundario; }
+
+    public String getMoneda() { return moneda; }
+    public void setMoneda(String moneda) { this.moneda = moneda; }
 
     public EstadoSuscripcion getEstadoSuscripcion() { return estadoSuscripcion; }
     public void setEstadoSuscripcion(EstadoSuscripcion estadoSuscripcion) { this.estadoSuscripcion = estadoSuscripcion; }

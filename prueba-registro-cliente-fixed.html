@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba Registro Cliente</title>
+</head>
+<body>
+    <h1>Prueba de Registro de Cliente</h1>
+    <form id="registroForm">
+        <div>
+            <label for="nombre">Nombre:</label>
+            <input type="text" id="nombre" name="nombre" value="Juan Pérez" required>
+        </div>
+        <div>
+            <label for="apellidos">Apellidos:</label>
+            <input type="text" id="apellidos" name="apellidos" value="García López" required>
+        </div>
+        <div>
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" value="test@example.com" required>
+        </div>
+        <div>
+            <label for="telefono">Teléfono:</label>
+            <input type="tel" id="telefono" name="telefono" value="1234567890">
+        </div>
+        <div>
+            <label for="password">Contraseña:</label>
+            <input type="password" id="password" name="password" value="123456" required>
+        </div>
+        <button type="submit">Registrar</button>
+    </form>
+
+    <div id="resultado"></div>
+
+    <script>
+        document.getElementById('registroForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const datos = Object.fromEntries(formData);
+            
+            console.log('=== DATOS DEL FORMULARIO ===');
+            console.log('Datos a enviar:', datos);
+            console.log('Campo nombre:', datos.nombre);
+            console.log('Campo apellidos:', datos.apellidos);
+            console.log('Campo email:', datos.email);
+            console.log('Campo telefono:', datos.telefono);
+            console.log('Campo password:', datos.password);
+            console.log('Tipo de apellidos:', typeof datos.apellidos);
+            console.log('¿Apellidos está vacío?', !datos.apellidos);
+            console.log('JSON que se enviará:', JSON.stringify(datos));
+            console.log('===============================');
+            
+            // Verificar que apellidos no esté vacío
+            if (!datos.apellidos || datos.apellidos.trim() === '') {
+                document.getElementById('resultado').innerHTML = 
+                    `<div style="color: red;">Error: El campo apellidos está vacío</div>`;
+                return;
+            }
+            
+            try {
+                const response = await fetch('http://localhost:8080/api/publico/minegocio/auth/registro', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(datos)
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                
+                const resultado = await response.json();
+                console.log('Resultado:', resultado);
+                
+                if (response.ok) {
+                    document.getElementById('resultado').innerHTML = 
+                        `<div style="color: green;">¡Registro exitoso! ${JSON.stringify(resultado)}</div>`;
+                } else {
+                    document.getElementById('resultado').innerHTML = 
+                        `<div style="color: red;">Error: ${JSON.stringify(resultado)}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('resultado').innerHTML = 
+                    `<div style="color: red;">Error de conexión: ${error.message}</div>`;
+            }
+        });
+    </script>
+</body>
+</html>

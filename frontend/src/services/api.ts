@@ -3,6 +3,7 @@ import type { AxiosInstance } from 'axios';
 import type { 
   RegistroEmpresaDTO, 
   LoginDTO, 
+  LoginResponse,
   Empresa, 
   Usuario, 
   Producto, 
@@ -30,7 +31,12 @@ class ApiService {
     // Interceptor para agregar token de autenticación
     this.api.interceptors.request.use(
       (config) => {
-        const token = localStorage.getItem('token');
+        // Intentar obtener token de administrador o cliente
+        const tokenAdmin = localStorage.getItem('token');
+        const tokenCliente = localStorage.getItem('clienteToken');
+        
+        const token = tokenAdmin || tokenCliente;
+        
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
@@ -47,7 +53,15 @@ class ApiService {
           // Token expirado o inválido
           localStorage.removeItem('token');
           localStorage.removeItem('user');
-          window.location.href = '/login';
+          localStorage.removeItem('clienteToken');
+          localStorage.removeItem('clienteInfo');
+          
+          // Redirigir según el tipo de usuario
+          if (window.location.pathname.startsWith('/admin')) {
+            window.location.href = '/admin/login';
+          } else {
+            window.location.href = '/login';
+          }
         }
         return Promise.reject(error);
       }
@@ -66,11 +80,22 @@ class ApiService {
   }
 
   async obtenerEmpresaPorSubdominio(subdominio: string): Promise<ApiResponse<Empresa>> {
-    const response = await this.api.get(`/empresas/subdominio/${subdominio}`);
+    const response = await this.api.get(`/publico/${subdominio}/empresa`);
     return response.data;
   }
 
-  async login(data: LoginDTO): Promise<{ token: string; nombreUsuario: string; email: string; roles: string[]; empresaId: number; empresaNombre: string; empresaSubdominio: string }> {
+  // Métodos de administrador
+  async obtenerEmpresaAdmin(): Promise<ApiResponse<Empresa>> {
+    const response = await this.api.get('/admin/empresa');
+    return response.data;
+  }
+
+  async actualizarEmpresaAdmin(data: Partial<Empresa>): Promise<ApiResponse<Empresa>> {
+    const response = await this.api.put('/admin/empresa', data);
+    return response.data;
+  }
+
+  async login(data: LoginDTO): Promise<LoginResponse> {
     const response = await this.api.post('/auth/login', data);
     return response.data;
   }
@@ -260,6 +285,48 @@ class ApiService {
     }
     
     const response = await this.api.get(`/empresas/${empresaId}/productos/por-estado?${params}`);
+    return response.data;
+  }
+
+  // Métodos públicos para catálogo (por subdominio)
+  async obtenerProductosPublicos(
+    subdominio: string,
+    filtros?: { categoria?: string; marca?: string; buscar?: string }
+  ): Promise<ApiResponse<Producto[]>> {
+    // Construir parámetros solo si tienen valores
+    const params = new URLSearchParams();
+    if (filtros?.categoria) params.append('categoria', filtros.categoria);
+    if (filtros?.marca) params.append('marca', filtros.marca);
+    if (filtros?.buscar) params.append('buscar', filtros.buscar);
+    
+    const queryString = params.toString();
+    const url = `/publico/${subdominio}/productos${queryString ? `?${queryString}` : ''}`;
+    
+    console.log('URL de productos:', url);
+    const response = await this.api.get(url);
+    return response.data;
+  }
+
+  async obtenerProductoPublico(subdominio: string, id: number): Promise<ApiResponse<Producto>> {
+    const response = await this.api.get(`/publico/${subdominio}/productos/${id}`);
+    return response.data;
+  }
+
+  // Métodos de autenticación de clientes
+  async loginCliente(subdominio: string, datos: { email: string; password: string }) {
+    const response = await this.api.post(`/publico/${subdominio}/auth/login`, datos);
+    return response.data;
+  }
+
+  async registrarCliente(subdominio: string, datos: { nombre: string; apellidos?: string; email: string; telefono?: string; password: string }) {
+    const response = await this.api.post(`/publico/${subdominio}/auth/registro`, datos);
+    return response.data;
+  }
+
+  async obtenerPerfilCliente(subdominio: string, token: string) {
+    const response = await this.api.get(`/publico/${subdominio}/auth/perfil`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
     return response.data;
   }
 }

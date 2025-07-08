@@ -23,8 +23,11 @@ export default function GestorImagenes({
 
   // Sincronizar las imágenes cuando cambien las imagenesIniciales
   useEffect(() => {
+    console.log('=== DEBUG GESTOR IMAGENES ===');
+    console.log('imagenesIniciales recibidas:', imagenesIniciales);
+    console.log('empresaId:', empresaId);
     setImagenes(imagenesIniciales);
-  }, [imagenesIniciales]);
+  }, [imagenesIniciales, empresaId]);
 
   const handleSeleccionarArchivo = () => {
     if (disabled) return;

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso al Catálogo - Mi Negocio</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .info {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .link-button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #3b82f6;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            margin: 10px;
+            font-weight: bold;
+        }
+        .link-button:hover {
+            background-color: #2563eb;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        code {
+            background: #f1f1f1;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏪 Mi Negocio - Sistema Multi-Tenant</h1>
+        
+        <div class="info">
+            <h3>📋 Estado del Sistema:</h3>
+            <ul>
+                <li>✅ <strong>Backend:</strong> Funcionando en puerto 8080</li>
+                <li>✅ <strong>Frontend:</strong> Funcionando en puerto 5173</li>
+                <li>✅ <strong>Autenticación de clientes:</strong> Implementada</li>
+                <li>✅ <strong>Multi-tenancy:</strong> Configurado por subdominios</li>
+            </ul>
+        </div>
+
+        <div class="warning">
+            <h3>⚠️ Importante:</h3>
+            <p>El sistema funciona con <strong>subdominios</strong>. Cada empresa tiene su propia tienda:</p>
+            <ul>
+                <li><code>localhost:5173</code> → Página principal (registro de empresas)</li>
+                <li><code>vinos.localhost:5173</code> → Tienda de la empresa "Vinos"</li>
+                <li><code>minegocio.localhost:5173</code> → Tienda de la empresa "Mi Negocio"</li>
+            </ul>
+        </div>
+
+        <h2>🚀 Acceso Rápido:</h2>
+        
+        <h3>Catálogos Públicos (Clientes):</h3>
+        <a href="http://vinos.localhost:5173" class="link-button" target="_blank">
+            🍷 Tienda Vinos
+        </a>
+        <a href="http://minegocio.localhost:5173" class="link-button" target="_blank">
+            🏪 Tienda Mi Negocio
+        </a>
+
+        <h3>Administración:</h3>
+        <a href="http://localhost:5173/admin/login" class="link-button" target="_blank">
+            👨‍💼 Panel de Administración
+        </a>
+
+        <h3>Pruebas de API:</h3>
+        <a href="./prueba-auth-clientes.html" class="link-button" target="_blank">
+            🧪 Probar Autenticación de Clientes
+        </a>
+
+        <div class="info">
+            <h3>🔧 Configuración del Sistema:</h3>
+            <p><strong>Empresas creadas:</strong></p>
+            <ul>
+                <li><strong>Vinos</strong> - Subdominio: vinos</li>
+                <li><strong>Mi Negocio</strong> - Subdominio: minegocio</li>
+            </ul>
+            
+            <p><strong>Endpoints de Backend:</strong></p>
+            <ul>
+                <li><code>GET /api/publico/{subdominio}/empresa</code> - Info de empresa</li>
+                <li><code>GET /api/publico/{subdominio}/productos</code> - Catálogo público</li>
+                <li><code>POST /api/publico/{subdominio}/auth/registro</code> - Registro de clientes</li>
+                <li><code>POST /api/publico/{subdominio}/auth/login</code> - Login de clientes</li>
+            </ul>
+        </div>
+
+        <div class="warning">
+            <h3>🐛 ¿Problemas con subdominios en desarrollo?</h3>
+            <p>Si los subdominios no funcionan en tu entorno local:</p>
+            <ol>
+                <li>Edita el archivo <code>C:\Windows\System32\drivers\etc\hosts</code> (como administrador)</li>
+                <li>Agrega estas líneas:</li>
+                <pre style="background: #f1f1f1; padding: 10px; margin: 10px 0;">127.0.0.1 vinos.localhost
+127.0.0.1 minegocio.localhost</pre>
+                <li>Guarda el archivo y reinicia el navegador</li>
+            </ol>
+        </div>
+
+        <script>
+            // Verificar conexión con el backend
+            fetch('http://localhost:8080/api/publico/vinos/empresa')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('✅ Backend funcionando:', data);
+                    const statusDiv = document.createElement('div');
+                    statusDiv.innerHTML = `
+                        <div style="background: #d4edda; border: 1px solid #c3e6cb; padding: 10px; border-radius: 5px; margin: 20px 0;">
+                            <strong>✅ Conexión con Backend exitosa!</strong><br>
+                            Empresa: ${data.data.nombre}<br>
+                            Subdominio: ${data.data.subdominio}
+                        </div>
+                    `;
+                    document.querySelector('.container').appendChild(statusDiv);
+                })
+                .catch(error => {
+                    console.error('❌ Error conectando con backend:', error);
+                    const statusDiv = document.createElement('div');
+                    statusDiv.innerHTML = `
+                        <div style="background: #f8d7da; border: 1px solid #f5c6cb; padding: 10px; border-radius: 5px; margin: 20px 0;">
+                            <strong>❌ No se puede conectar con el Backend</strong><br>
+                            Asegúrate de que el servidor esté corriendo en el puerto 8080
+                        </div>
+                    `;
+                    document.querySelector('.container').appendChild(statusDiv);
+                });
+        </script>
+    </div>
+</body>
+</html>

@@ -10,6 +10,7 @@ export interface Empresa {
   logoUrl?: string;
   colorPrimario: string;
   colorSecundario: string;
+  moneda: string;
   estadoSuscripcion: 'PRUEBA' | 'ACTIVA' | 'SUSPENDIDA' | 'CANCELADA';
   fechaFinPrueba: string;
   activa: boolean;
@@ -184,4 +185,17 @@ export interface PaginatedResponse<T> {
   size: number;
   first: boolean;
   last: boolean;
+}
+
+// Tipos para autenticación
+export interface LoginResponse {
+  token: string;
+  nombreUsuario: string;
+  email: string;
+  nombre: string;
+  apellidos: string;
+  roles: string[];
+  empresaId: number;
+  empresaNombre: string;
+  empresaSubdominio: string;
 }

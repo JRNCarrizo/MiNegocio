@@ -45,6 +45,8 @@ public class ProductoDTO {
     
     private Boolean activo;
     
+    private Boolean destacado;
+    
     private Long empresaId;
     
     private String empresaNombre;
@@ -59,7 +61,7 @@ public class ProductoDTO {
     
     public ProductoDTO(Long id, String nombre, String descripcion, BigDecimal precio, 
                       Integer stock, Integer stockMinimo, String imagenUrl, String categoria, 
-                      String marca, Boolean activo, Long empresaId, String empresaNombre, 
+                      String marca, Boolean activo, Boolean destacado, Long empresaId, String empresaNombre, 
                       LocalDateTime fechaCreacion, LocalDateTime fechaActualizacion) {
         this.id = id;
         this.nombre = nombre;
@@ -71,6 +73,7 @@ public class ProductoDTO {
         this.categoria = categoria;
         this.marca = marca;
         this.activo = activo;
+        this.destacado = destacado;
         this.empresaId = empresaId;
         this.empresaNombre = empresaNombre;
         this.fechaCreacion = fechaCreacion;
@@ -166,6 +169,14 @@ public class ProductoDTO {
         this.activo = activo;
     }
     
+    public Boolean getDestacado() {
+        return destacado;
+    }
+    
+    public void setDestacado(Boolean destacado) {
+        this.destacado = destacado;
+    }
+    
     public Long getEmpresaId() {
         return empresaId;
     }
@@ -212,6 +223,7 @@ public class ProductoDTO {
                 ", categoria='" + categoria + '\'' +
                 ", marca='" + marca + '\'' +
                 ", activo=" + activo +
+                ", destacado=" + destacado +
                 ", empresaId=" + empresaId +
                 ", empresaNombre='" + empresaNombre + '\'' +
                 ", fechaCreacion=" + fechaCreacion +

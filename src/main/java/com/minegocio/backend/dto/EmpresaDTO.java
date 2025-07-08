@@ -18,6 +18,7 @@ public class EmpresaDTO {
     private String logoUrl;
     private String colorPrimario;
     private String colorSecundario;
+    private String moneda;
     private Empresa.EstadoSuscripcion estadoSuscripcion;
     private LocalDateTime fechaFinPrueba;
     private Boolean activa;
@@ -43,6 +44,7 @@ public class EmpresaDTO {
         this.logoUrl = empresa.getLogoUrl();
         this.colorPrimario = empresa.getColorPrimario();
         this.colorSecundario = empresa.getColorSecundario();
+        this.moneda = empresa.getMoneda();
         this.estadoSuscripcion = empresa.getEstadoSuscripcion();
         this.fechaFinPrueba = empresa.getFechaFinPrueba();
         this.activa = empresa.getActiva();
@@ -77,6 +79,9 @@ public class EmpresaDTO {
 
     public String getColorSecundario() { return colorSecundario; }
     public void setColorSecundario(String colorSecundario) { this.colorSecundario = colorSecundario; }
+
+    public String getMoneda() { return moneda; }
+    public void setMoneda(String moneda) { this.moneda = moneda; }
 
     public Empresa.EstadoSuscripcion getEstadoSuscripcion() { return estadoSuscripcion; }
     public void setEstadoSuscripcion(Empresa.EstadoSuscripcion estadoSuscripcion) { this.estadoSuscripcion = estadoSuscripcion; }

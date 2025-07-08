@@ -68,6 +68,11 @@ const EditarProducto: React.FC = () => {
       if (response && response.data) {
         const producto = response.data;
         console.log('Producto cargado para edición:', producto);
+        console.log('=== DEBUG IMÁGENES ===');
+        console.log('Imágenes en el producto:', producto.imagenes);
+        console.log('Cantidad de imágenes:', producto.imagenes?.length || 0);
+        console.log('Tipos de imágenes:', producto.imagenes?.map(img => typeof img));
+        console.log('=== FIN DEBUG IMÁGENES ===');
         
         setFormulario({
           nombre: producto.nombre,

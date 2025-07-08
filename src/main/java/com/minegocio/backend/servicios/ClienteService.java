@@ -64,6 +64,15 @@ public class ClienteService {
     }
 
     public ClienteDTO crearCliente(Long empresaId, ClienteDTO clienteDTO) {
+        System.out.println("=== DEBUG ClienteService.crearCliente ===");
+        System.out.println("EmpresaId: " + empresaId);
+        System.out.println("ClienteDTO recibido:");
+        System.out.println("  Nombre: '" + clienteDTO.getNombre() + "'");
+        System.out.println("  Apellidos: '" + clienteDTO.getApellidos() + "'");
+        System.out.println("  Email: '" + clienteDTO.getEmail() + "'");
+        System.out.println("  Password: '" + (clienteDTO.getPassword() != null ? "[PRESENTE - " + clienteDTO.getPassword().length() + " chars]" : "[NULL]") + "'");
+        System.out.println("  Telefono: '" + clienteDTO.getTelefono() + "'");
+        
         Empresa empresa = empresaRepository.findById(empresaId)
                 .orElseThrow(() -> new RuntimeException("Empresa no encontrada"));
 
@@ -74,15 +83,21 @@ public class ClienteService {
 
         Cliente cliente = new Cliente();
         cliente.setNombre(clienteDTO.getNombre());
-        cliente.setApellidos(clienteDTO.getApellido()); // Usar apellidos en lugar de apellido
+        cliente.setApellidos(clienteDTO.getApellidos()); // Corregido: usar getApellidos()
         cliente.setEmail(clienteDTO.getEmail());
         cliente.setTelefono(clienteDTO.getTelefono());
+        cliente.setPassword(clienteDTO.getPassword()); // Agregar la contraseña
         cliente.setDireccion(clienteDTO.getDireccion());
         cliente.setCiudad(clienteDTO.getCiudad());
         cliente.setPais(clienteDTO.getPais());
         cliente.setCodigoPostal(clienteDTO.getCodigoPostal());
         cliente.setActivo(true);
         cliente.setEmpresa(empresa);
+        
+        System.out.println("Entidad Cliente antes de guardar:");
+        System.out.println("  Nombre: '" + cliente.getNombre() + "'");
+        System.out.println("  Apellidos: '" + cliente.getApellidos() + "'");
+        System.out.println("  Email: '" + cliente.getEmail() + "'");
 
         Cliente clienteGuardado = clienteRepository.save(cliente);
         return convertirADTO(clienteGuardado);
@@ -99,13 +114,18 @@ public class ClienteService {
         }
 
         cliente.setNombre(clienteDTO.getNombre());
-        cliente.setApellidos(clienteDTO.getApellido()); // Usar apellidos en lugar de apellido
+        cliente.setApellidos(clienteDTO.getApellidos()); // Usar apellidos en lugar de apellido
         cliente.setEmail(clienteDTO.getEmail());
         cliente.setTelefono(clienteDTO.getTelefono());
         cliente.setDireccion(clienteDTO.getDireccion());
         cliente.setCiudad(clienteDTO.getCiudad());
         cliente.setPais(clienteDTO.getPais());
         cliente.setCodigoPostal(clienteDTO.getCodigoPostal());
+        
+        // Actualizar contraseña solo si se proporciona
+        if (clienteDTO.getPassword() != null && !clienteDTO.getPassword().isEmpty()) {
+            cliente.setPassword(clienteDTO.getPassword());
+        }
 
         Cliente clienteActualizado = clienteRepository.save(cliente);
         return convertirADTO(clienteActualizado);
@@ -127,19 +147,20 @@ public class ClienteService {
     }
 
     private ClienteDTO convertirADTO(Cliente cliente) {
-        return new ClienteDTO(
-                cliente.getId(),
-                cliente.getNombre(),
-                cliente.getApellidos(), // Usar apellidos en lugar de apellido
-                cliente.getEmail(),
-                cliente.getTelefono(),
-                cliente.getDireccion(),
-                cliente.getCiudad(),
-                cliente.getPais(),
-                cliente.getCodigoPostal(),
-                cliente.getActivo(),
-                cliente.getEmpresa().getId(),
-                cliente.getEmpresa().getNombre()
-        );
+        ClienteDTO dto = new ClienteDTO();
+        dto.setId(cliente.getId());
+        dto.setNombre(cliente.getNombre());
+        dto.setApellidos(cliente.getApellidos());
+        dto.setEmail(cliente.getEmail());
+        dto.setTelefono(cliente.getTelefono());
+        dto.setDireccion(cliente.getDireccion());
+        dto.setCiudad(cliente.getCiudad());
+        dto.setPais(cliente.getPais());
+        dto.setCodigoPostal(cliente.getCodigoPostal());
+        dto.setActivo(cliente.getActivo());
+        dto.setEmpresaId(cliente.getEmpresa().getId());
+        dto.setEmpresaNombre(cliente.getEmpresa().getNombre());
+        dto.setPassword(cliente.getPassword()); // ¡IMPORTANTE! Incluir la contraseña
+        return dto;
     }
 }

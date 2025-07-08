@@ -131,6 +131,10 @@ public class ProductoService {
             producto.setActivo(productoDTO.getActivo());
         }
         
+        if (productoDTO.getDestacado() != null) {
+            producto.setDestacado(productoDTO.getDestacado());
+        }
+        
         // Actualizar imágenes si se proporciona
         if (productoDTO.getImagenes() != null) {
             producto.setImagenes(new ArrayList<>(productoDTO.getImagenes()));
@@ -244,6 +248,7 @@ public class ProductoService {
         dto.setCategoria(producto.getCategoria());
         dto.setMarca(producto.getMarca());
         dto.setActivo(producto.getActivo());
+        dto.setDestacado(producto.getDestacado());
         dto.setEmpresaId(producto.getEmpresa().getId());
         dto.setEmpresaNombre(producto.getEmpresa().getNombre());
         dto.setFechaCreacion(producto.getFechaCreacion());

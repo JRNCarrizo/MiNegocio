@@ -105,6 +105,8 @@ public class AutenticacionService {
                 jwt,
                 usuarioEntity.getEmail(), // Usar email como nombreUsuario
                 usuarioEntity.getEmail(),
+                usuarioEntity.getNombre(),
+                usuarioEntity.getApellidos(),
                 List.of(usuarioEntity.getRol().name()),
                 usuarioEntity.getEmpresa().getId(),
                 usuarioEntity.getEmpresa().getNombre(),
@@ -161,6 +163,13 @@ public class AutenticacionService {
      * Obtiene un usuario por email (para debugging)
      */
     public Optional<Usuario> obtenerUsuarioPorEmail(String email) {
+        return usuarioRepository.findByEmail(email);
+    }
+
+    /**
+     * Obtiene un usuario por email
+     */
+    public Optional<Usuario> obtenerPorEmail(String email) {
         return usuarioRepository.findByEmail(email);
     }
 }

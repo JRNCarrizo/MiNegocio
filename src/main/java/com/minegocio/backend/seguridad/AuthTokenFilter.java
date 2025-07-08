@@ -35,13 +35,21 @@ public class AuthTokenFilter extends OncePerRequestFilter {
         try {
             String requestPath = request.getRequestURI();
             String method = request.getMethod();
+            
+            // Skip authentication for public endpoints
+            if (isPublicEndpoint(requestPath)) {
+                System.out.println("Skipping auth for public endpoint: " + method + " " + requestPath);
+                filterChain.doFilter(request, response);
+                return;
+            }
+            
             System.out.println("=== DEBUG AuthTokenFilter ===");
             System.out.println("Request: " + method + " " + requestPath);
             
             String jwt = parseJwt(request);
             System.out.println("JWT extraído: " + (jwt != null ? "Presente (longitud: " + jwt.length() + ")" : "Ausente"));
             
-            if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
+            if (jwt != null && jwtUtils != null && jwtUtils.validateJwtToken(jwt)) {
                 String email = jwtUtils.getEmailFromJwtToken(jwt);
                 System.out.println("Email extraído del JWT: " + email);
 
@@ -95,5 +103,19 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
         System.out.println("No se encontró token válido en Authorization header");
         return null;
+    }
+
+    /**
+     * Verifica si el endpoint es público y no requiere autenticación
+     */
+    private boolean isPublicEndpoint(String requestPath) {
+        return requestPath.startsWith("/api/publico/") ||
+               requestPath.startsWith("/api/auth/") ||
+               requestPath.startsWith("/api/debug/") ||
+               requestPath.startsWith("/api/empresas/registro") ||
+               requestPath.startsWith("/api/empresas/verificar-subdominio/") ||
+               requestPath.startsWith("/h2-console/") ||
+               requestPath.startsWith("/swagger-ui/") ||
+               requestPath.startsWith("/v3/api-docs/");
     }
 }

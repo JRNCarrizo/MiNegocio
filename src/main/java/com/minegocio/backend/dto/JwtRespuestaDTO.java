@@ -12,6 +12,10 @@ public class JwtRespuestaDTO {
     
     private String email;
     
+    private String nombre;
+    
+    private String apellidos;
+    
     private List<String> roles;
     
     private Long empresaId;
@@ -24,11 +28,13 @@ public class JwtRespuestaDTO {
     public JwtRespuestaDTO() {}
     
     public JwtRespuestaDTO(String token, String nombreUsuario, String email, 
-                          List<String> roles, Long empresaId, String empresaNombre, 
-                          String empresaSubdominio) {
+                          String nombre, String apellidos, List<String> roles, 
+                          Long empresaId, String empresaNombre, String empresaSubdominio) {
         this.token = token;
         this.nombreUsuario = nombreUsuario;
         this.email = email;
+        this.nombre = nombre;
+        this.apellidos = apellidos;
         this.roles = roles;
         this.empresaId = empresaId;
         this.empresaNombre = empresaNombre;
@@ -66,6 +72,22 @@ public class JwtRespuestaDTO {
     
     public void setEmail(String email) {
         this.email = email;
+    }
+    
+    public String getNombre() {
+        return nombre;
+    }
+    
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+    
+    public String getApellidos() {
+        return apellidos;
+    }
+    
+    public void setApellidos(String apellidos) {
+        this.apellidos = apellidos;
     }
     
     public List<String> getRoles() {

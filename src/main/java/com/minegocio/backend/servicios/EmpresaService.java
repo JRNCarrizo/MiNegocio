@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -119,6 +120,27 @@ public class EmpresaService {
     public Optional<EmpresaDTO> obtenerPorId(Long id) {
         return empresaRepository.findById(id)
                 .map(EmpresaDTO::new);
+    }
+
+    /**
+     * Obtiene una empresa por su subdominio
+     */
+    public Optional<Empresa> obtenerPorSubdominio(String subdominio) {
+        return empresaRepository.findBySubdominio(subdominio);
+    }
+
+    /**
+     * Obtiene todas las empresas (para debug)
+     */
+    public List<Empresa> obtenerTodasLasEmpresas() {
+        return empresaRepository.findAll();
+    }
+
+    /**
+     * Guarda una empresa
+     */
+    public Empresa guardar(Empresa empresa) {
+        return empresaRepository.save(empresa);
     }
 
     /**

@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import ApiService from '../services/api';
+import NavbarAdmin from '../components/NavbarAdmin';
+import { useUsuarioActual } from '../hooks/useUsuarioActual';
 
 export default function DashboardAdministrador() {
-  const navigate = useNavigate();
+  const { datosUsuario, cerrarSesion } = useUsuarioActual();
   const [estadisticas, setEstadisticas] = useState({
     productos: 0,
     clientes: 0,
@@ -14,25 +16,15 @@ export default function DashboardAdministrador() {
   const [cargandoEstadisticas, setCargandoEstadisticas] = useState(true);
 
   useEffect(() => {
-    // Verificar si el usuario está autenticado
-    const token = localStorage.getItem('token');
-    const userStr = localStorage.getItem('user');
-    
-    if (!token || !userStr) {
-      navigate('/admin/login');
-      return;
-    }
-
     const cargarEstadisticas = async () => {
+      // Verificar si tenemos datos del usuario
+      if (!datosUsuario?.empresaId) {
+        return;
+      }
+
       try {
         setCargandoEstadisticas(true);
-        const user = JSON.parse(userStr);
-        const empresaId = user.empresaId;
-
-        if (!empresaId) {
-          console.error('No se encontró empresaId en el usuario');
-          return;
-        }
+        const empresaId = datosUsuario.empresaId;
 
         // Cargar productos reales
         console.log('Dashboard - Cargando productos para empresaId:', empresaId);
@@ -65,12 +57,11 @@ export default function DashboardAdministrador() {
     };
 
     cargarEstadisticas();
-  }, [navigate]);
+  }, [datosUsuario?.empresaId]);
 
-  const cerrarSesion = () => {
-    localStorage.removeItem('token');
+  const cerrarSesionConToast = () => {
+    cerrarSesion();
     toast.success('Sesión cerrada correctamente');
-    navigate('/');
   };
 
   const tarjetasEstadisticas = [
@@ -136,30 +127,21 @@ export default function DashboardAdministrador() {
   return (
     <div className="h-pantalla-minimo" style={{ backgroundColor: '#f8fafc' }}>
       {/* Navegación */}
-      <nav className="navbar">
-        <div className="contenedor">
-          <div className="navbar-contenido">
-            <Link to="/" className="logo">
-              miNegocio - Admin
-            </Link>
-            <div className="flex items-centro">
-              <button 
-                onClick={cerrarSesion}
-                className="boton boton-secundario"
-              >
-                Cerrar Sesión
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <NavbarAdmin 
+        onCerrarSesion={cerrarSesionConToast}
+        empresaNombre={datosUsuario?.empresaNombre}
+        nombreAdministrador={datosUsuario?.nombre}
+      />
 
       {/* Contenido principal */}
       <div className="contenedor py-8">
         {/* Encabezado */}
         <div className="mb-8">
           <h1 className="titulo-2 mb-2">Panel de Administración</h1>
-          <p className="texto-gris">Bienvenido de vuelta. Aquí tienes un resumen de tu negocio.</p>
+          <p className="texto-gris">
+            Bienvenido{datosUsuario?.nombre ? ` ${datosUsuario.nombre}` : ''}. 
+            Aquí tienes un resumen de {datosUsuario?.empresaNombre || 'tu negocio'}.
+          </p>
         </div>
 
         {/* Menú de navegación rápida */}

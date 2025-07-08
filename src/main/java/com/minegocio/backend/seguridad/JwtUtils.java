@@ -75,6 +75,13 @@ public class JwtUtils {
     }
 
     /**
+     * Alias para compatibilidad - extrae el nombre de usuario (email) del token
+     */
+    public String extractUsername(String token) {
+        return getEmailFromJwtToken(token);
+    }
+
+    /**
      * Obtiene el ID del usuario desde el token JWT
      */
     public Long getUserIdFromJwtToken(String token) {

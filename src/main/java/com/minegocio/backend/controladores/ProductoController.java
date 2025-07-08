@@ -194,7 +194,7 @@ public class ProductoController {
     public ResponseEntity<?> actualizarProducto(
             @PathVariable Long empresaId,
             @PathVariable Long id,
-            @Valid @RequestBody ProductoDTO productoDTO) {
+            @RequestBody ProductoDTO productoDTO) {
         try {
             System.out.println("=== DEBUG ACTUALIZAR PRODUCTO ===");
             System.out.println("EmpresaId: " + empresaId);
